@@ -60,6 +60,13 @@ class DefaultNode():
 
     def __init__(self, object_names: List[str]):
         self._name = 'object_bundle'
+        #remove the ego-robot and grasp goal as collision obstacles:
+        if "dingo2" in object_names:
+            object_names.remove("dingo2")
+        if "dingo1" in object_names:
+            object_names.remove("dingo1")
+        if "mug1" in object_names:
+            object_names.remove("mug1")
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         rospy.init_node(self._name)
         self._rate = rospy.Rate(10)
@@ -104,7 +111,8 @@ class DefaultNode():
             self._rate.sleep()
 
 if __name__ == "__main__":
-    node = DefaultNode(['mug1'])
+    object_names = rospy.get_param("object_names")
+    node = DefaultNode(object_names)
     try:
         node.run()
     except rospy.ROSInterruptException:
