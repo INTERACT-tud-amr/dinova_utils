@@ -60,7 +60,6 @@ class DefaultNode():
 
     def __init__(self, object_names: List[str]):
         self._name = 'object_bundle'
-        #remove the ego-robot and grasp goal as collision obstacles:
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         rospy.init_node(self._name)
         self._rate = rospy.Rate(10)
@@ -106,7 +105,7 @@ class DefaultNode():
 
 if __name__ == "__main__":
     vicon_names = rospy.get_param("object_names")
-    agents = ['dingo1', 'dingo2']
+    agents = ['dingo1', 'dingo2', 'mug1']
     object_names = [name for name in vicon_names if name not in agents]
     node = DefaultNode(object_names)
     try:
