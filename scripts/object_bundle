@@ -104,7 +104,10 @@ class DefaultNode():
             self._rate.sleep()
 
 if __name__ == "__main__":
-    node = DefaultNode(['mug1'])
+    vicon_names = rospy.get_param("object_names")
+    agents = ['dingo1', 'dingo2', 'mug1']
+    object_names = [name for name in vicon_names if name not in agents]
+    node = DefaultNode(object_names)
     try:
         node.run()
     except rospy.ROSInterruptException:
