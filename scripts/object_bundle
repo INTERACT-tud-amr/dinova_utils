@@ -56,7 +56,7 @@ class DefaultNode():
     _rate: rospy.Rate
     _subscribers: Dict[str, rospy.Subscriber]
     _object_poses: Dict[str, PoseStamped]
-    _object_radius: float = 0.35
+    _object_radius: float = 0.10
     
     def __init__(self, object_names: List[str]):
         self._name = 'object_bundle'
