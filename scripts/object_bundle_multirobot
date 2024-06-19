@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+from typing import Union, Dict, List
+import rospy
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
+from shape_msgs.msg import SolidPrimitive
+from derived_object_msgs.msg import Object, ObjectArray
+from dinova_utils.fk_multirobot import FKMultiRobot
+
+from enum import Enum
+
+class LogMode(Enum):
+    TOPIC = "topic"
+    LOGINFO = "loginfo"
+    LOGWARN = "logwarn"
+    TERMINAL = "terminal"
+
+class Logger():
+    _name: str
+    _mode: LogMode
+    _rate: rospy.Rate
+
+    def __init__(self, name: str, mode: LogMode = LogMode.TERMINAL):
+        self._name = name
+        self._mode = mode
+        self._topic_name = self._name + "/log"
+
+        rospy.init_node(self._name)
+        self._rate = rospy.Rate(10)
+        self._debug_publisher = rospy.Publisher(
+            self._topic_name,
+            String,
+            queue_size=10
+        )
+
+
+    def log(self, message: str, mode: Union[None, LogMode] = None):
+        log_mode = mode if mode else self._mode
+        if log_mode == LogMode.TERMINAL:
+            print(f"{self._name}: {message}")
+        elif log_mode == LogMode.TOPIC:
+            try:
+                self._debug_publisher.publish(String(data=message))
+            except AttributeError as e:
+                rospy.logwarn(f"Message cannot be published as topic due to {e}")
+        elif log_mode == LogMode.LOGINFO:
+            rospy.loginfo(f"{self._name}: {message}")
+
+
+
+
+class DefaultNode():
+
+    _name: str
+    _logger: Logger
+    _rate: rospy.Rate
+    _subscribers: Dict[str, rospy.Subscriber]
+    _object_poses: Dict[str, PoseStamped]
+    _object_radius: float = 0.10
+    
+    def __init__(self, object_names: List[str]):
+        self._name = 'object_bundle'
+        rospy.init_node(self._name)
+        self._rate = rospy.Rate(10)
+        self.establish_ros_connections(object_names)
+        self._logger = Logger(self._name, mode=LogMode.LOGINFO)
+        # if "dingo2" in object_names:
+        #     object_names.remove("dingo2")
+        self._object_poses = {}
+        if "dingo1" in object_names:
+            object_names.remove("dingo1")
+        if "mug1" in object_names:
+            object_names.remove("mug1")
+        if "cup1" in object_names:
+            object_names.remove("cup1")
+        if "wineglass" in object_names:
+            object_names.remove("wineglass")
+        self.object_names = object_names
+        self.multi_robot_fk = FKMultiRobot()
+        self.object_poses_full = {}
+
+    def establish_ros_connections(self, object_names: List[str]):
+        self._subscribers = {}
+        for object_name in object_names:
+            topic_name = f"/vicon/{object_name}"
+            self._subscribers[topic_name] = rospy.Subscriber(
+                topic_name,
+                PoseStamped,
+                self.object_callback,
+                callback_args=object_name,
+            )
+        self._object_publisher = rospy.Publisher("/objects", ObjectArray, queue_size=1)
+
+    def object_callback(self, data: PoseStamped, object_name: str):
+        self._object_poses[object_name] = data
+        
+    def publish_objects_multiagent(self, object_poses_full):
+        object_array = ObjectArray()
+        object_array.header.stamp = rospy.Time.now()
+        for object_name, pose in enumerate(object_poses_full.values()):
+            obj = Object()
+            obj.header = object_array.header
+            obj.id = object_name
+            obj.pose = pose.pose
+            obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
+            object_array.objects.append(obj)
+        self._object_publisher.publish(object_array)
+
+    def run(self):
+        while not rospy.is_shutdown():
+            object_poses_full = self.multi_robot_fk.collision_spheres_other_agent(self.object_names, self._object_poses)
+            self.publish_objects_multiagent(object_poses_full)
+            self._rate.sleep()
+
+if __name__ == "__main__":
+    object_names = rospy.get_param("/vicon/object_specific/object_names")
+    node = DefaultNode(object_names)
+    try:
+        node.run()
+    except rospy.ROSInterruptException:
+        pass
