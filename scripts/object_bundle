@@ -56,10 +56,21 @@ class DefaultNode():
     _rate: rospy.Rate
     _subscribers: Dict[str, rospy.Subscriber]
     _object_poses: Dict[str, PoseStamped]
-    _object_radius: float = 0.1
-
+    _object_radius: float = 0.10
+    
     def __init__(self, object_names: List[str]):
         self._name = 'object_bundle'
+        #remove the ego-robot and grasp goal as collision obstacles:
+        if "dingo2" in object_names:
+            object_names.remove("dingo2")
+        if "dingo1" in object_names:
+            object_names.remove("dingo1")
+        if "mug1" in object_names:
+            object_names.remove("mug1")
+        if "cup1" in object_names:
+            object_names.remove("cup1")
+        if "wineglass" in object_names:
+            object_names.remove("wineglass")
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         rospy.init_node(self._name)
         self._rate = rospy.Rate(10)
@@ -104,7 +115,8 @@ class DefaultNode():
             self._rate.sleep()
 
 if __name__ == "__main__":
-    node = DefaultNode(['mug1'])
+    object_names = rospy.get_param("/vicon/object_specific/object_names")
+    node = DefaultNode(object_names)
     try:
         node.run()
     except rospy.ROSInterruptException:
