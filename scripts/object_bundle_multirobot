@@ -67,8 +67,6 @@ class DefaultNode():
         self._rate = rospy.Rate(10)
         self.establish_ros_connections(object_names)
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
-        # if "dingo2" in object_names:
-        #     object_names.remove("dingo2")
         self._object_poses = {}
         if self.robot_name in object_names:
             object_names.remove(robot_name)
