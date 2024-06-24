@@ -23,24 +23,25 @@ class FKMultiRobot():
         self.collision_links = {self.other_agents[0]: ["chassis_link", "arm_tool_frame"]}
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
-        lidar_argument = rospy.get_param(robot_name+'/lidar') 
-        if lidar_argument == True:
-            robot_name = "dinova_lidar"
-        else:
-            robot_name = "dinova"
-        self.URDF_FILE = rospack.get_path("dinova_fabrics_wrapper") + "/config/" + robot_name + ".urdf"
-        self._q = None
-        self.symbolic_fk()
+        self._q_other_agents = [None] * len(self.other_agents)
+        for other_agent in self.other_agents:
+            lidar_argument = rospy.get_param(other_agent+'/lidar') 
+            if lidar_argument == True:
+                agent_name = "dinova_lidar"
+            else:
+                agent_name = "dinova"
+            URDF_FILE = rospack.get_path("dinova_fabrics_wrapper") + "/config/" + agent_name + ".urdf"
+            self.symbolic_fk(URDF_FILE)
         self._init_subscribers()
         
     def _init_subscribers(self):
         self._joint_states_sub = rospy.Subscriber(self.other_agents[0]+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
 
     def _joint_states_cb(self, msg: JointState):
-        self._q = np.array(msg.position)[0:9]
+        self._q_other_agents[0] = np.array(msg.position)[0:9]
             
-    def symbolic_fk(self) -> GenericURDFFk:
-        with open(self.URDF_FILE, "r", encoding="utf-8") as file:
+    def symbolic_fk(self, URDF_FILE) -> GenericURDFFk:
+        with open(URDF_FILE, "r", encoding="utf-8") as file:
             urdf = file.read()
         self.forward_kinematics = GenericURDFFk(
             urdf,
@@ -61,13 +62,17 @@ class FKMultiRobot():
     def collision_spheres_other_agent(self, object_names, object_poses):
         object_poses_full = copy.deepcopy(object_poses)
         print("object_poses:", object_poses)
-        if self._q is not None:
+        if self._q_other_agents[0] is not None:
             object_poses_full.pop(self.ego_agent)
+            print("hereeee")
             for agent in self.other_agents:
+                print("hereeee2")
+                print("object_names:", object_names)
                 if agent in object_names:
                     object_poses_full.pop(agent)
                     for collision_link in self.collision_links[agent]:
-                        object_pose = self.forward_kinematics.numpy(q=self._q,
+                        print("hereeee3")
+                        object_pose = self.forward_kinematics.numpy(q=self._q_other_agents[0],
                                                     parent_link = "base_link",
                                                     child_link = collision_link,
                                                     position_only=True)
