@@ -12,14 +12,18 @@ from derived_object_msgs.msg import Object, ObjectArray
 class FKMultiRobot():
     # ---- Problem in this file: --- #
     # should use q from the other robot, but is using q from the ego robot for defining the sphere positions ---#
-    def __init__(self):
+    def __init__(self, robot_name):
         # for now: define variables here ---------------------#
-        self.ego_agent = "dingo1"
-        self.other_agents = ["dingo2"]
-        self.collision_links = {"dingo2": ["chassis_link", "arm_tool_frame"]}
+        self.robot_name = robot_name
+        self.ego_agent = self.robot_name
+        if self.ego_agent == "dingo2":
+            self.other_agents = ["dingo1"]
+        else:
+            self.other_agents = ["dingo2"]
+        self.collision_links = {self.other_agents[0]: ["chassis_link", "arm_tool_frame"]}
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
-        lidar_argument = rospy.get_param('/lidar') 
+        lidar_argument = rospy.get_param(robot_name+'/lidar') 
         if lidar_argument == True:
             robot_name = "dinova_lidar"
         else:
@@ -30,7 +34,7 @@ class FKMultiRobot():
         self._init_subscribers()
         
     def _init_subscribers(self):
-        self._joint_states_sub = rospy.Subscriber('/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        self._joint_states_sub = rospy.Subscriber(self.other_agents[0]+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
 
     def _joint_states_cb(self, msg: JointState):
         self._q = np.array(msg.position)[0:9]
@@ -56,6 +60,7 @@ class FKMultiRobot():
                 
     def collision_spheres_other_agent(self, object_names, object_poses):
         object_poses_full = copy.deepcopy(object_poses)
+        print("object_poses:", object_poses)
         if self._q is not None:
             object_poses_full.pop(self.ego_agent)
             for agent in self.other_agents:
@@ -72,5 +77,6 @@ class FKMultiRobot():
                         object_poses_full[object_name].pose.position.y = object_pose[1]
                         object_poses_full[object_name].pose.position.z = object_pose[2]
                         object_poses_full[object_name].header.frame_id = "map"
+        print("object_poses_full:", object_poses_full)
         return object_poses_full
     
