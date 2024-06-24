@@ -1,1 +1,2 @@
 objects_to_remove: [cup1, cup2, wineglass]
+# self.collision_links = {self.other_agents[0]: ["chassis_link", "arm_tool_frame"]}
