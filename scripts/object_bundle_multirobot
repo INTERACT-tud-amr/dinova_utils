@@ -68,7 +68,6 @@ class DefaultNode():
         # -------------------------------------#
         self.robot_name = rospy.get_namespace()
         self.robot_name = self.robot_name[1:-1]
-        print("hereee111")
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
         self._object_poses = {}
         self.objects_to_remove = rospy.get_param("objects_to_remove")
