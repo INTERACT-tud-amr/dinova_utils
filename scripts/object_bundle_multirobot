@@ -60,25 +60,28 @@ class DefaultNode():
     _object_poses: Dict[str, PoseStamped]
     _object_radius: float = 0.10
     
-    def __init__(self, robot_name: str, object_names: List[str]):
+    def __init__(self):
         self._name = 'object_bundle'
-        self.robot_name = robot_name
         rospy.init_node(self._name)
         self._rate = rospy.Rate(10)
-        self.establish_ros_connections(object_names)
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
+        # -------------------------------------#
+        self.robot_name = rospy.get_namespace()
+        self.robot_name = self.robot_name[1:-1]
+        print("hereee111")
+        self.object_names = rospy.get_param("vicon/object_specific/object_names")
         self._object_poses = {}
-        if self.robot_name in object_names:
-            object_names.remove(robot_name)
-        if "cup1" in object_names:
-            object_names.remove("cup1")
-        if "cup2" in object_names:
-            object_names.remove("cup2")
-        if "wineglass" in object_names:
-            object_names.remove("wineglass")
-        self.object_names = object_names
-        self.multi_robot_fk = FKMultiRobot(robot_name)
+        self.objects_to_remove = rospy.get_param("objects_to_remove")
+        for object_remove in self.objects_to_remove:
+            if object_remove in self.object_names:
+                self.object_names.remove(object_remove)
+        if self.robot_name in self.object_names:
+            self.object_names.remove(self.robot_name)
+        print("object_names that are considered: ", self.object_names)
+        self.multi_robot_fk = FKMultiRobot(self.robot_name)
         self.object_poses_full = {}
+        
+        self.establish_ros_connections(self.object_names)
 
     def establish_ros_connections(self, object_names: List[str]):
         self._subscribers = {}
@@ -90,7 +93,7 @@ class DefaultNode():
                 self.object_callback,
                 callback_args=object_name,
             )
-        self._object_publisher = rospy.Publisher(self.robot_name+"/objects", ObjectArray, queue_size=1)
+        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=1)
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
@@ -114,12 +117,7 @@ class DefaultNode():
             self._rate.sleep()
 
 if __name__ == "__main__":
-    if len(sys.argv)>1:
-        robot_name = sys.argv[1]
-    else:
-        print("please specify robot name as an argument, e.g.: dingo1, dingo2")
-    object_names = rospy.get_param(robot_name+"/vicon/object_specific/object_names")
-    node = DefaultNode(robot_name, object_names)
+    node = DefaultNode()
     try:
         node.run()
     except rospy.ROSInterruptException:

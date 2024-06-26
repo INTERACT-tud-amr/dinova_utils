@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+	<group ns="$(env ROBOT_NAME)">
+		<rosparam file="$(find dinova_utils)/config/dinova_multi.yaml"/>
+		<node pkg="dinova_utils" type="object_bundle_multirobot" name="object_bundle_multirobot" output="screen">
+		</node>
+	</group>
+</launch>
