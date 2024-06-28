@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<group ns="$(env ROBOT_NAME)">
+		<node pkg="dinova_utils" type="object_bundle" name="object_bundle" output="screen">
+		</node>
+	</group>
+</launch>
