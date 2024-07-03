@@ -89,7 +89,7 @@ class DefaultNode():
                 self.object_callback,
                 callback_args=object_name,
             )
-        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=1)
+        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data

@@ -93,7 +93,7 @@ class DefaultNode():
                 self.object_callback,
                 callback_args=object_name,
             )
-        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=1)
+        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
@@ -120,8 +120,6 @@ class DefaultNode():
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
             object_array.objects.append(obj)
             self._object_publisher.publish(object_array)
-            print("object_name:", object_name)
-            print("obj.shape:", obj.shape)
 
     def run(self):
         while not rospy.is_shutdown():
