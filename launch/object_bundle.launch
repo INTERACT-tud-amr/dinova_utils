@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<group ns="$(env ROBOT_NAME)">
+		<rosparam file="$(find dinova_utils)/config/dinova.yaml"/>
 		<node pkg="dinova_utils" type="object_bundle" name="object_bundle" output="screen">
 		</node>
 	</group>
