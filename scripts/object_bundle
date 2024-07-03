@@ -2,6 +2,7 @@
 from typing import Union, Dict, List
 import rospy
 import sys
+import time
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from shape_msgs.msg import SolidPrimitive
@@ -65,6 +66,7 @@ class DefaultNode():
         self.robot_name = self.robot_name[1:-1]
         self.object_names = rospy.get_param("/"+self.robot_name+"/vicon/object_specific/object_names")
         self.objects_to_remove = rospy.get_param("/"+self.robot_name+"/objects_to_remove")
+        self.radius_objects = rospy.get_param("/"+self.robot_name+"/radius_objects")
         for object_remove in self.objects_to_remove:
             if object_remove in self.object_names:
                 self.object_names.remove(object_remove)
@@ -87,7 +89,7 @@ class DefaultNode():
                 self.object_callback,
                 callback_args=object_name,
             )
-        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=1)
+        self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
@@ -95,12 +97,15 @@ class DefaultNode():
     def publish_objects(self):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
-        for object_name, pose in enumerate(self._object_poses.values()):
+        for i, (object_name, pose) in enumerate(list(self._object_poses.items())):
             obj = Object()
             obj.header = object_array.header
-            obj.id = object_name
+            obj.id = i
             obj.pose = pose.pose
-            obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
+            if object_name in self.radius_objects:
+                obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
+            else:
+                obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
             object_array.objects.append(obj)
         self._object_publisher.publish(object_array)
 
