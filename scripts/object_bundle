@@ -97,7 +97,6 @@ class DefaultNode():
     def publish_objects(self):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
-        time.sleep(0.1)
         for i, (object_name, pose) in enumerate(list(self._object_poses.items())):
             obj = Object()
             obj.header = object_array.header
