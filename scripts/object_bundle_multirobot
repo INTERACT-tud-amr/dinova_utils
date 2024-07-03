@@ -120,6 +120,8 @@ class DefaultNode():
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
             object_array.objects.append(obj)
             self._object_publisher.publish(object_array)
+            print("object_name:", object_name)
+            print("obj.shape:", obj.shape)
 
     def run(self):
         while not rospy.is_shutdown():
