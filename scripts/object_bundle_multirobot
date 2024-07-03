@@ -69,6 +69,7 @@ class DefaultNode():
         self.robot_name = rospy.get_namespace()
         self.robot_name = self.robot_name[1:-1]
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
+        self.radius_objects = rospy.get_param("/"+self.robot_name+"/radius_objects")
         self._object_poses = {}
         self.objects_to_remove = rospy.get_param("objects_to_remove")
         for object_remove in self.objects_to_remove:
@@ -100,14 +101,25 @@ class DefaultNode():
     def publish_objects_multiagent(self, object_poses_full):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
-        for object_name, pose in enumerate(object_poses_full.values()):
+        # for object_name, pose in enumerate(object_poses_full.values()):
+        #     obj = Object()
+        #     obj.header = object_array.header
+        #     obj.id = object_name
+        #     obj.pose = pose.pose
+        #     obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
+        #     object_array.objects.append(obj)
+        # self._object_publisher.publish(object_array)
+        for i, (object_name, pose) in enumerate(list(object_poses_full.items())):
             obj = Object()
             obj.header = object_array.header
-            obj.id = object_name
+            obj.id = i
             obj.pose = pose.pose
-            obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
+            if object_name in self.radius_objects:
+                obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
+            else:
+                obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
             object_array.objects.append(obj)
-        self._object_publisher.publish(object_array)
+            self._object_publisher.publish(object_array)
 
     def run(self):
         while not rospy.is_shutdown():
