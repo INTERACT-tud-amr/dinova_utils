@@ -2,9 +2,9 @@ objects_to_remove: [cup1, cup2, wineglass]
 all_agents: ["dingo1", "dingo2"]
 collision_links: {"dingo1": ["chassis_link", "arm_upper_wrist_link"], "dingo2": ["chassis_link", "arm_upper_wrist_link"]}
 radius_objects: {
-  "dingo1_chassis_link": 0.40,
+  "dingo1_chassis_link": 0.550,
   "dingo1_arm_upper_wrist_link": 0.4,
-  "dingo2_chassis_link": 0.40,
+  "dingo2_chassis_link": 0.55,
   "dingo2_arm_upper_wrist_link": 0.4,
   "tablesmall_1": 0.19,
   "tablesmall_2": 0.24,
