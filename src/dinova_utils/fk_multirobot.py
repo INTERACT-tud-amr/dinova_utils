@@ -13,14 +13,14 @@ class FKMultiRobot():
     def __init__(self, robot_name):
         # ---- variables from yaml file ---- #
         self.robot_name = robot_name
-        self.other_agents = rospy.get_param("all_agents")
+        self.other_agents = list(rospy.get_param("all_agents").keys())
         self.other_agents.remove(self.robot_name)
-        self.collision_links = rospy.get_param("collision_links")
+        self.collision_links = rospy.get_param("all_agents")[robot_name]['collision_links']
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
         self._q_other_agents = [None] * len(self.other_agents)
         for other_agent in self.other_agents:
-            lidar_argument = rospy.get_param("/"+other_agent+'/lidar') 
+            lidar_argument = rospy.get_param('all_agents')[other_agent]['lidar']
             if lidar_argument == True:
                 agent_name = "dinova_lidar"
             else:
