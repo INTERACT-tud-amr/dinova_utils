@@ -13,14 +13,14 @@ class FKMultiRobot():
     def __init__(self, robot_name):
         # ---- variables from yaml file ---- #
         self.robot_name = robot_name
-        self.other_agents = list(rospy.get_param("all_agents").keys())
-        self.other_agents.remove(self.robot_name)
-        self.collision_links = rospy.get_param("all_agents")[robot_name]['collision_links']
+        self.other_agents = rospy.get_param("all_agents")
+        del self.other_agents[self.robot_name]
+        #self.collision_links = self.other_agents[robot_name]['collision_links']
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
         self._q_other_agents = [None] * len(self.other_agents)
         for other_agent in self.other_agents:
-            lidar_argument = rospy.get_param('all_agents')[other_agent]['lidar']
+            lidar_argument = self.other_agents[other_agent]['lidar']
             if lidar_argument == True:
                 agent_name = "dinova_lidar"
             else:
@@ -31,7 +31,8 @@ class FKMultiRobot():
         
     def _init_subscribers(self):
         # --- currently only subscribing to 1 other robot ---- #
-        self._joint_states_sub = rospy.Subscriber("/"+self.other_agents[0]+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        other_agent_name = list(self.other_agents.keys())[0]
+        self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
 
     def _joint_states_cb(self, msg: JointState):
         self._q_other_agents[0] = np.array(msg.position)[0:9]
@@ -56,15 +57,15 @@ class FKMultiRobot():
     def collision_spheres_other_agent(self, object_names, object_poses):
         object_poses_full = copy.deepcopy(object_poses)
         if self._q_other_agents[0] is not None:
-            for agent in self.other_agents:
-                if agent in object_names:
-                    object_poses_full.pop(agent)
-                    for collision_link in self.collision_links[agent]:
+            for agent_name, agent in self.other_agents.items():
+                if agent_name in object_names:
+                    object_poses_full.pop(agent_name)
+                    for collision_link in agent['collision_links']:
                         object_pose = self.forward_kinematics.numpy(q=self._q_other_agents[0],
                                                     parent_link = "base_link",
                                                     child_link = collision_link,
                                                     position_only=True)
-                        object_name = agent+"_"+collision_link
+                        object_name = agent_name+"_"+collision_link
                         object_poses_full[object_name] = PoseStamped()
                         object_poses_full[object_name].pose.position.x = object_pose[0]
                         object_poses_full[object_name].pose.position.y = object_pose[1]
