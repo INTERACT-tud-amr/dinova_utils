@@ -15,4 +15,5 @@ radius_objects: {
   "dingo2_arm_upper_wrist_link": 0.4,
   "tablesmall_1": 0.19,
   "tablesmall_2": 0.24,
+  "dynamic_object2": 0.6
 }
