@@ -6,3 +6,5 @@ radius_objects: {
   "tablesmall_2": 0.24,
   "dynamic_object2": 0.6
 }
+
+static_objects: [tablesmall_1, tablesmall_2] #currently hard-coded

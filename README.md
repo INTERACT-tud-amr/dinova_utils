@@ -5,7 +5,7 @@ A customized diova utils package to coorperate with dinova_mpc package.
 
 * **`~vicon/object_specific/object_names`** (list of string)
 
-    A list of strings contains all the object names whose Vicon topics the dinova_utils node will listen to.
+    A list of strings contains all the object names whose Vicon topics the dinova_utils node will listen to. For real world applications, it is usaully set by the bringup launch file of dinova robot. For simulation, it need to be set manually.
 
 * **`~objects_to_remove`** (list of string)
 
@@ -13,7 +13,7 @@ A customized diova utils package to coorperate with dinova_mpc package.
 
 * **`~radius_objects`** (list of float)
 
-    Radius of each object
+    Radius of remaining objects
 
 #### Subscribed Topics
 
