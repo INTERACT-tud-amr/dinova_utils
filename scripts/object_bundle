@@ -93,7 +93,7 @@ class DefaultNode():
                 callback_args=object_name,
             )
         self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
-        self._staic_object_publisher = rospy.Publisher("static_objects", ObjectArray, queue_size=10)
+        self._static_object_publisher = rospy.Publisher("static_objects", ObjectArray, queue_size=10)
         
 
     def object_callback(self, data: PoseStamped, object_name: str):
