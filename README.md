@@ -1,7 +1,7 @@
 # dinova_utils
 A customized diova utils package to coorperate with dinova_mpc package. This forked version separates static objects from object list and publish it to a independant topic.
 
-#### Compulsary Parameters
+#### Parameters
 
 * **`~vicon/object_specific/object_names`** (list of string)
 
@@ -15,7 +15,7 @@ A customized diova utils package to coorperate with dinova_mpc package. This for
 
     Radius of remaining objects
 
-* **`~static_objects`** (list of float)
+* **`~static_objects`** (list of string)
 
     A list of strings contains all the static object names. Curently hard-coded as [tablesmall_1, tablesmall_2]
     
