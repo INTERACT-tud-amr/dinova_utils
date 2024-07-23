@@ -67,6 +67,9 @@ class DefaultNode():
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
         self.objects_to_remove = rospy.get_param("objects_to_remove")
         self.radius_objects = rospy.get_param("radius_objects")
+        
+        self.static_objects = rospy.get_param("static_objects")
+        
         for object_remove in self.objects_to_remove:
             if object_remove in self.object_names:
                 self.object_names.remove(object_remove)
@@ -90,6 +93,8 @@ class DefaultNode():
                 callback_args=object_name,
             )
         self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
+        self._staic_object_publisher = rospy.Publisher("static_objects", ObjectArray, queue_size=10)
+        
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
@@ -97,6 +102,10 @@ class DefaultNode():
     def publish_objects(self):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
+        
+        static_object_array = ObjectArray()
+        static_object_array.header.stamp = rospy.Time.now()
+        
         for i, (object_name, pose) in enumerate(list(self._object_poses.items())):
             obj = Object()
             obj.header = object_array.header
@@ -106,7 +115,13 @@ class DefaultNode():
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
             else:
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
-            object_array.objects.append(obj)
+                
+            if object_name in self.static_objects:
+                static_object_array.objects.append(obj)
+            else:
+                object_array.objects.append(obj)
+            
+        self._static_object_publisher.publish(static_object_array)
         self._object_publisher.publish(object_array)
 
     def run(self):
