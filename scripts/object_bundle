@@ -64,9 +64,9 @@ class DefaultNode():
         self._name = 'object_bundle'
         self.robot_name = rospy.get_namespace()
         self.robot_name = self.robot_name[1:-1]
-        self.object_names = rospy.get_param("/"+self.robot_name+"/vicon/object_specific/object_names")
-        self.objects_to_remove = rospy.get_param("/"+self.robot_name+"/objects_to_remove")
-        self.radius_objects = rospy.get_param("/"+self.robot_name+"/radius_objects")
+        self.object_names = rospy.get_param("vicon/object_specific/object_names")
+        self.objects_to_remove = rospy.get_param("objects_to_remove")
+        self.radius_objects = rospy.get_param("radius_objects")
         for object_remove in self.objects_to_remove:
             if object_remove in self.object_names:
                 self.object_names.remove(object_remove)
