@@ -67,6 +67,7 @@ class DefaultNode():
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
         self.objects_to_remove = rospy.get_param("objects_to_remove")
         self.radius_objects = rospy.get_param("radius_objects")
+        self.box_objects = rospy.get_param("box_objects")
         
         self.static_objects = rospy.get_param("static_objects")
         
@@ -117,8 +118,12 @@ class DefaultNode():
             obj.header = object_array.header
             obj.id = i
             obj.pose = pose.pose
-            if object_name in self.radius_objects:
+            if object_name in self.radius_objects:#if sphere
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
+
+            elif object_name in self.box_objects:#if box
+                obj.shape = SolidPrimitive(type=SolidPrimitive.BOX, dimensions=self.box_objects[object_name])
+                
             else:
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self._object_radius])
                 
