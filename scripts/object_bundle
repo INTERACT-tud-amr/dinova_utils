@@ -92,8 +92,10 @@ class DefaultNode():
                 self.object_callback,
                 callback_args=object_name,
             )
+            
         self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
         self._static_object_publisher = rospy.Publisher("static_objects", ObjectArray, queue_size=10)
+        self._dynamic_object_publisher = rospy.Publisher("dynamic_objects", ObjectArray, queue_size=10)
         
 
     def object_callback(self, data: PoseStamped, object_name: str):
@@ -102,6 +104,9 @@ class DefaultNode():
     def publish_objects(self):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
+        
+        dynamic_object_array = ObjectArray()
+        dynamic_object_array.header.stamp = rospy.Time.now()
         
         static_object_array = ObjectArray()
         static_object_array.header.stamp = rospy.Time.now()
@@ -120,10 +125,13 @@ class DefaultNode():
             if object_name in self.static_objects:
                 static_object_array.objects.append(obj)
             else:
-                object_array.objects.append(obj)
+                dynamic_object_array.objects.append(obj)
             
-        self._static_object_publisher.publish(static_object_array)
+            object_array.objects.append(obj)
+            
         self._object_publisher.publish(object_array)
+        self._static_object_publisher.publish(static_object_array)
+        self._dynamic_object_publisher.publish(dynamic_object_array)
 
     def run(self):
         while not rospy.is_shutdown():
