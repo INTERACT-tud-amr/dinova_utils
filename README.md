@@ -1,5 +1,5 @@
 # dinova_utils
-A customized diova utils package to coorperate with dinova_mpc package. This forked version separates static objects from object list and publish it to a independant topic.
+A customized diova_utils package to coorperate with dinova_mpc package. This forked version separates static objects from object list and publish it to a independant topic.
 
 #### Parameters
 
@@ -11,9 +11,13 @@ A customized diova utils package to coorperate with dinova_mpc package. This for
 
     A list of strings contains all the object names that `dinova_utils` will not insert into the published objects topic.
 
-* **`~radius_objects`** (list of float)
+* **`~radius_objects`** (dictionary of string and float)
 
-    Radius of remaining objects
+    Radius of sphere objects. Format: `<object_name>: radius`
+
+* **`~box_objects`** (dictionary of string and list of float)
+
+    Sizes of box objects. Format: `<object_name>: [width, length, height]`
 
 * **`~static_objects`** (list of string)
 
@@ -31,11 +35,15 @@ A customized diova utils package to coorperate with dinova_mpc package. This for
 #### Published Topics
 * **`~static_objects`** ([derived_object_msg/ObjectArray])
 
-    The topic stacks the information of all the static objects and published them at once.
+    The topic stacks the information of all the static objects
+* **`~dynamic_objects`** ([derived_object_msg/ObjectArray])
+
+    The topic stacks the information of all the other/dynamic objects
 
 * **`~objects`** ([derived_object_msg/ObjectArray])
 
-    The topic stacks the information of all the other objects and published them at once.
+    The topic stacks the information of all objects and published them at once. This topic is mainly used as input topic of the nodes of `objects_visualization`
 
+    
 
 <!-- kinova_cmd_topic -->
