@@ -2,9 +2,14 @@ objects_to_remove: [cup1, cup2, wineglass]
 radius_objects: {
   "dingo1": 0.45,
   "dingo2": 0.45,
-  "tablesmall_1": 0.19,
-  "tablesmall_2": 0.24,
-  "dynamic_object2": 0.6
+  # "tablesmall_1": 0.19,
+  # "tablesmall_2": 0.24,
+  "dynamic_object2": 0.3
+}
+
+box_objects: {
+  "tablesmall_1": [0.45,0.45,0.38], #width, width ,height
+  "tablesmall_2": [0.5,0.5,0.48]
 }
 
 static_objects: [tablesmall_1, tablesmall_2] #currently hard-coded
