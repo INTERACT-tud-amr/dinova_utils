@@ -3,7 +3,7 @@ import rospkg
 import rospy
 #from forwardkinematics.urdfFks.generic_urdf_fk import GenericURDFFk
 #import pinocchio for fk
-from fk_pin import MobileManipulatorKinematics
+from dinova_utils.fk_pin import MobileManipulatorKinematics #add dinova_utils to avoid module import error
 
 import numpy as np
 from sensor_msgs.msg import JointState
@@ -68,7 +68,9 @@ class FKMultiRobot():
         object_poses_full = copy.deepcopy(object_poses)
         if self._q_other_agents[0] is not None:
             for agent_name, agent in self.other_agents.items():
-                if agent_name in object_names:#defined in vicon_dinova.yaml
+                if agent_name in object_names and agent_name in object_poses:
+                    #1. agent_name is defined in vicon_dinova.yaml 
+                    # 2. only pop it when it is available, otherwise error!
                     object_poses_full.pop(agent_name)#pop the agent's correpsonding pose and attach its fk poses
                     #Apply forward kinematics to the robot by configuration
                     self.forward_robot_kinematics.forward(q=self._q_other_agents[0])
@@ -79,7 +81,7 @@ class FKMultiRobot():
                         #                             child_link = collision_link,
                         #                             position_only=True)
                         # replaced by pinocchio
-                        object_pose = self.forward_robot_kinematics.link_pose("chassis_link")[0]
+                        object_pose = self.forward_robot_kinematics.link_pose(collision_link)[0]
                         
                         object_name = agent_name+"_"+collision_link
                         object_poses_full[object_name] = PoseStamped()
