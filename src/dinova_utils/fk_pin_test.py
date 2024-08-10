@@ -70,6 +70,7 @@ if __name__ == "__main__":
     nv = model.nv #9
     data = model.createData()
     q = np.array([-1.0, 1.0, 0, 1.5708, -0.7854, 1.5708, -0.7854, 1.5708, 1.3100])
+    
     forward(data, q)
     link_name = "tool_frame"
     if not model.existFrame(link_name):
