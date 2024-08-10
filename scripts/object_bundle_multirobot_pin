@@ -69,6 +69,7 @@ class DefaultNode():
         self.robot_name = rospy.get_namespace()
         self.robot_name = self.robot_name[1:-1]
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
+        # print("############object_names##########",self.object_names)
         self.radius_objects = rospy.get_param("/"+self.robot_name+"/radius_objects")
         self._object_poses = {}
         self.objects_to_remove = rospy.get_param("objects_to_remove")
@@ -87,6 +88,7 @@ class DefaultNode():
         self._subscribers = {}
         for object_name in object_names:
             topic_name = f"/vicon/{object_name}"
+            
             self._subscribers[topic_name] = rospy.Subscriber(
                 topic_name,
                 PoseStamped,
@@ -96,6 +98,7 @@ class DefaultNode():
         self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
 
     def object_callback(self, data: PoseStamped, object_name: str):
+        # print("##############object_name#################",object_name)
         self._object_poses[object_name] = data
         
     def publish_objects_multiagent(self, object_poses_full):
@@ -115,9 +118,13 @@ class DefaultNode():
 
     def run(self):
         while not rospy.is_shutdown():
+            # print("####################self.object_poses#############",self._object_poses)
             object_poses_full = self.multi_robot_fk.collision_spheres_other_agent(self.object_names, self._object_poses)
             self.publish_objects_multiagent(object_poses_full)
             self._rate.sleep()
+
+                
+
 
 if __name__ == "__main__":
     node = DefaultNode()
