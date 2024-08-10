@@ -10,9 +10,9 @@ all_agents:
      - tool_frame
 radius_objects: {
   "dingo1_chassis_link": 0.550,
-  "dingo1_tool_link": 0.4,
+  "dingo1_tool_frame": 0.4,
   "dingo2_chassis_link": 0.55,
-  "dingo2_tool_link": 0.4,
+  "dingo2_tool_frame": 0.4,
   # "tablesmall_1": 0.19,
   # "tablesmall_2": 0.24,
   "dynamic_object2": 0.6
