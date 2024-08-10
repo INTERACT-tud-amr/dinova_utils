@@ -1,7 +1,7 @@
 objects_to_remove: [cup1, cup2, wineglass]
 all_agents:
   dingo1:
-    lidar: true
+    lidar: false
     collision_links: ["chassis_link", "arm_upper_wrist_link"]
   dingo2:
     lidar: false
