@@ -46,6 +46,18 @@ A customized diova_utils package to coorperate with dinova_mpc package. This for
 
     The topic stacks the information of all objects and published them at once. This topic is mainly used as input topic of the nodes of `objects_visualization`
 
+#### Config files
+
+* **dinova.yaml** 
+
+    An example configuration file.
+
+#### Launch files
+
+* **object_bundle.launch** 
+
+    An example launch file to load parameters with `object_bundle`.
+
 
 
 ## `object_bundle_multirobot_pin`
@@ -96,5 +108,16 @@ A customized `object_bundle_multirobot` node using `pinocchio`-based forward kin
 * **`~objects`** ([derived_object_msg/ObjectArray])
 
     The topic stacks the information of all objects and published them at once. This topic is mainly used as input topic of the nodes of `objects_visualization`
+
+#### Config files
+
+* **dinova_multi.yaml** 
+
+    An example configuration file.
+#### Launch files
+
+* **object_bundle_dinovas.launch** 
+
+    An example launch file to load parameters with `object_bundle_multirobot_pin`.
 
 <!-- kinova_cmd_topic -->
