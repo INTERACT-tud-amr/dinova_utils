@@ -1,26 +1,19 @@
 objects_to_remove: [cup1, cup2, wineglass]
 all_agents:
   dingo1:
-    lidar: false
-    collision_links: ["chassis_link", "tool_frame"]
+    lidar: true
+    collision_links: ["chassis_link", "arm_upper_wrist_link"]
   dingo2:
     lidar: false
     collision_links: 
      - chassis_link
-     - tool_frame
+     - arm_upper_wrist_link
 radius_objects: {
   "dingo1_chassis_link": 0.550,
-  "dingo1_tool_frame": 0.4,
+  "dingo1_arm_upper_wrist_link": 0.4,
   "dingo2_chassis_link": 0.55,
-  "dingo2_tool_frame": 0.4,
-  # "tablesmall_1": 0.19,
-  # "tablesmall_2": 0.24,
+  "dingo2_arm_upper_wrist_link": 0.4,
+  "tablesmall_1": 0.19,
+  "tablesmall_2": 0.24,
   "dynamic_object2": 0.6
 }
-
-box_objects: {
-  "tablesmall_1": [0.45,0.45,0.38], #width, width ,height
-  "tablesmall_2": [0.5,0.5,0.48]
-}
-
-static_objects: [tablesmall_1, tablesmall_2] #currently hard-coded
