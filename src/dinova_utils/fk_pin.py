@@ -1,10 +1,6 @@
 #pinocchio version of fk
-# from pathlib import Path
 import numpy as np
 import pinocchio
-# import rospkg
-#from spatialmath.base import r2q
-#from xacrodoc import XacroDoc
 import rospkg
 
 # from .ros_utils import package_file_path
