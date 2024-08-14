@@ -2,12 +2,12 @@
 from typing import Union, Dict, List
 import rospy
 import sys
-import time
+import os
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from shape_msgs.msg import SolidPrimitive
 from derived_object_msgs.msg import Object, ObjectArray
-
+from dinova_utils.fk_multirobot_pin import FKMultiRobot
 
 from enum import Enum
 
@@ -60,16 +60,23 @@ class DefaultNode():
     _object_poses: Dict[str, PoseStamped]
     _object_radius: float = 0.10
     
-    def __init__(self): #, robot_name: str, object_names: List[str]):
+    def __init__(self):
         self._name = 'object_bundle'
+        rospy.init_node(self._name)
+        self._rate = rospy.Rate(10)
+        self._logger = Logger(self._name, mode=LogMode.LOGINFO)
+        # -------------------------------------#
         self.robot_name = rospy.get_namespace()
         self.robot_name = self.robot_name[1:-1]
         self.object_names = rospy.get_param("vicon/object_specific/object_names")
+        self.radius_objects = rospy.get_param("/"+self.robot_name+"/radius_objects")
+        self._object_poses = {}
         self.objects_to_remove = rospy.get_param("objects_to_remove")
-        self.radius_objects = rospy.get_param("radius_objects")
-        self.box_objects = rospy.get_param("box_objects")
         
+        self.box_objects = rospy.get_param("box_objects")
         self.static_objects = rospy.get_param("static_objects")
+        
+        
         
         for object_remove in self.objects_to_remove:
             if object_remove in self.object_names:
@@ -77,32 +84,31 @@ class DefaultNode():
         if self.robot_name in self.object_names:
             self.object_names.remove(self.robot_name)
         print("object_names that are considered: ", self.object_names)
-        self._logger = Logger(self._name, mode=LogMode.LOGINFO)
-        rospy.init_node(self._name)
-        self._rate = rospy.Rate(10)
-        self._object_poses = {}
+        self.multi_robot_fk = FKMultiRobot(self.robot_name)
+        self.object_poses_full = {}
+        
         self.establish_ros_connections(self.object_names)
 
     def establish_ros_connections(self, object_names: List[str]):
         self._subscribers = {}
         for object_name in object_names:
             topic_name = f"/vicon/{object_name}"
+            
             self._subscribers[topic_name] = rospy.Subscriber(
                 topic_name,
                 PoseStamped,
                 self.object_callback,
                 callback_args=object_name,
             )
-            
         self._object_publisher = rospy.Publisher("objects", ObjectArray, queue_size=10)
+        
         self._static_object_publisher = rospy.Publisher("static_objects", ObjectArray, queue_size=10)
         self._dynamic_object_publisher = rospy.Publisher("dynamic_objects", ObjectArray, queue_size=10)
-        
 
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
-
-    def publish_objects(self):
+        
+    def publish_objects_multiagent(self, object_poses_full):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
         
@@ -112,12 +118,12 @@ class DefaultNode():
         static_object_array = ObjectArray()
         static_object_array.header.stamp = rospy.Time.now()
         
-        for i, (object_name, pose) in enumerate(list(self._object_poses.items())):
-            # print(object_name, i)
+        for i, (object_name, pose) in enumerate(list(object_poses_full.items())):
             obj = Object()
             obj.header = object_array.header
             obj.id = i
             obj.pose = pose.pose
+            
             if object_name in self.radius_objects:#if sphere
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
 
@@ -134,19 +140,20 @@ class DefaultNode():
             
             object_array.objects.append(obj)
             
+            
+            
         self._object_publisher.publish(object_array)
         self._static_object_publisher.publish(static_object_array)
         self._dynamic_object_publisher.publish(dynamic_object_array)
 
     def run(self):
         while not rospy.is_shutdown():
-            """
-            if 'mug1' in self._object_poses:
-                self._logger.log(str(self._object_poses['mug1']))
-            """
-
-            self.publish_objects()
+            object_poses_full = self.multi_robot_fk.collision_spheres_other_agent(self.object_names, self._object_poses)
+            self.publish_objects_multiagent(object_poses_full)
             self._rate.sleep()
+
+                
+
 
 if __name__ == "__main__":
     node = DefaultNode()
