@@ -40,10 +40,14 @@ class FKMultiRobot():
     def _init_subscribers(self):
         # --- currently only subscribing to 1 other robot ---- #
         other_agent_name = list(self.other_agents.keys())[0]
-        
-        #self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
-        self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states', JointState, self._joint_states_cb)
+        if rospy.get_param("real_robot"):
+            self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        else:
+            self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states', JointState, self._joint_states_cb)
 
+            
+        
+        
     def _joint_states_cb(self, msg: JointState):
         self._q_other_agents[0] = np.array(msg.position)[0:9]
             
@@ -75,7 +79,6 @@ class FKMultiRobot():
                     #Apply forward kinematics to the robot by configuration
                     self.forward_robot_kinematics.forward(q=self._q_other_agents[0])
                     for collision_link in agent['collision_links']:# list
-                        
                         # object_pose = self.forward_kinematics.numpy(q=self._q_other_agents[0],
                         #                             parent_link = "base_link",
                         #                             child_link = collision_link,
