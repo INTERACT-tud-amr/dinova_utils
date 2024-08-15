@@ -2,7 +2,7 @@
 import numpy as np
 import pinocchio
 import rospkg
-
+from xacrodoc import XacroDoc
 # from .ros_utils import package_file_path
 
 class RobotKinematics:
@@ -64,7 +64,7 @@ class MobileManipulatorKinematics(RobotKinematics):
         if filepath is None:
             rospack = rospkg.RosPack()
             filepath = rospack.get_path("dinova_mpc") + "/assets/dinova_no_wheels.urdf"
-        #urdf_str = XacroDoc.from_file(filepath).to_urdf_string()
+        urdf_str = XacroDoc.from_file(filepath).to_urdf_string()
 
         # 3-DOF base joint
         root_joint = pinocchio.JointModelComposite(3)
@@ -72,8 +72,8 @@ class MobileManipulatorKinematics(RobotKinematics):
         root_joint.addJoint(pinocchio.JointModelPY())
         root_joint.addJoint(pinocchio.JointModelRZ())
 
-        #model = pinocchio.buildModelFromXML(urdf_str, root_joint)
-        model = pinocchio.buildModelsFromUrdf(filepath, root_joint)
+        model = pinocchio.buildModelFromXML(urdf_str, root_joint)
+        #model = pinocchio.buildModelsFromUrdf(filepath, root_joint)
 
         super().__init__(model, tool_link_name)
 
