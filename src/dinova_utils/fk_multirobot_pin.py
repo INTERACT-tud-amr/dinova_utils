@@ -20,19 +20,11 @@ class FKMultiRobot():
         self.other_agents = rospy.get_param("all_agents")
         
         del self.other_agents[self.robot_name]
-        #self.collision_links = self.other_agents[robot_name]['collision_links']
-        # ---------------------------------------- #
-        #rospack = rospkg.RosPack()
+        #get the configuration states of other robots
         self._q_other_agents = [None] * len(self.other_agents)
-        
-        # for other_agent in self.other_agents:
-        #     lidar_argument = self.other_agents[other_agent]['lidar']
-        #     if lidar_argument == True:
-        #         agent_name = "dinova_lidar"
-        #     else:
-        #         agent_name = "dinova"
-        #     URDF_FILE = rospack.get_path("dinova_fabrics_wrapper") + "/config/" + agent_name + ".urdf"
-        # self.symbolic_fk(URDF_FILE)
+        #get the configuration velocity of other robots
+        self._v_other_agents = [None] * len(self.other_agents)
+
         
         self.forward_robot_kinematics = MobileManipulatorKinematics()#initialize before the subscriber, othersie no arribute
         self._init_subscribers()
@@ -42,24 +34,21 @@ class FKMultiRobot():
         other_agent_name = list(self.other_agents.keys())[0]
         if rospy.get_param("real_robot"):
             self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+            self._joint_velocity_sub = rospy.Subscriber("/"+other_agent_name+'/filtered_velocities', JointState, self._joint_velocities_cb)
         else:
-            self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states', JointState, self._joint_states_cb)
+            self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states', JointState, self._joint_states_simulation_cb) 
+            #the velocity can be got directly
 
-            
-        
-        
     def _joint_states_cb(self, msg: JointState):
         self._q_other_agents[0] = np.array(msg.position)[0:9]
-            
-    # def symbolic_fk(self, URDF_FILE) -> GenericURDFFk:
-    #     with open(URDF_FILE, "r", encoding="utf-8") as file:
-    #         urdf = file.read()
-    #     self.forward_kinematics = GenericURDFFk(
-    #         urdf,
-    #         root_link="base_link",
-    #         end_links=["arm_tool_frame", "arm_orientation_helper_link"],
-    #     )
+    
+    def _joint_velocities_cb(self, msg: JointState):
+        self._v_other_agents[0] = np.array(msg.velocity)[0:9]
         
+    def _joint_states_simulation_cb(self, msg: JointState):
+        self._q_other_agents[0] = np.array(msg.position)[0:9]
+        self._v_other_agents[0] = np.array(msg.velocity)[0:9]
+            
     def object_naming(self, object_names:List[str]) -> List[str]:#maybe not used???
         for agent in self.other_agents:
             if agent in object_names:
@@ -73,11 +62,11 @@ class FKMultiRobot():
         if self._q_other_agents[0] is not None:
             for agent_name, agent in self.other_agents.items():
                 if agent_name in object_names and agent_name in object_poses:
-                    #1. agent_name is defined in vicon_dinova.yaml 
+                    # 1. agent_name is defined in vicon_dinova.yaml 
                     # 2. only pop it when it is available, otherwise error!
                     object_poses_full.pop(agent_name)#pop the agent's correpsonding pose and attach its fk poses
                     #Apply forward kinematics to the robot by configuration
-                    self.forward_robot_kinematics.forward(q=self._q_other_agents[0])
+                    self.forward_robot_kinematics.forward(q=self._q_other_agents[0], v=self._v_other_agents[0])
                     for collision_link in agent['collision_links']:# list
                         # object_pose = self.forward_kinematics.numpy(q=self._q_other_agents[0],
                         #                             parent_link = "base_link",
