@@ -58,6 +58,18 @@ class RobotKinematics:
         # if not rotation_matrix:
         #     orn = r2q(orn, order="xyzs")
         return pos, orn
+    
+    def link_velocity(self, link_idx=None, frame="local_world_aligned"):
+        """Get velocity of link at index link_idx"""
+        if link_idx is None:
+            link_idx = self.tool_idx
+        V = pinocchio.getFrameVelocity(
+            self.model,
+            self.data,
+            link_idx,
+            pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+        )
+        return V.linear, V.angular
 
 class MobileManipulatorKinematics(RobotKinematics):
     def __init__(self, filepath=None, tool_link_name="tool_frame"):
