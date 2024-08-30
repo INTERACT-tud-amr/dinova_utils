@@ -2,8 +2,7 @@
 import numpy as np
 import pinocchio
 import rospkg
-#from xacrodoc import XacroDoc
-# from .ros_utils import package_file_path
+
 
 class RobotKinematics:
     """Class representing the kinematics model of a robot."""
@@ -59,16 +58,22 @@ class RobotKinematics:
         #     orn = r2q(orn, order="xyzs")
         return pos, orn
     
-    def link_velocity(self, link_idx=None, frame="local_world_aligned"):
+    def link_velocity(self, link_name=None, frame="local_world_aligned"):
         """Get velocity of link at index link_idx"""
-        if link_idx is None:
+        if link_name is None:
             link_idx = self.tool_idx
+        else:
+            if not self.model.existFrame(link_name):
+                raise ValueError(f"Model has no frame named {link_name}.")
+            else:
+                link_idx = self.model.getFrameId(link_name)
+                
         V = pinocchio.getFrameVelocity(
             self.model,
             self.data,
             link_idx,
             pinocchio.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-        )
+        )#HARD-CODED as LOCAL_WORLD_ALIGNED
         return V.linear, V.angular
 
 class MobileManipulatorKinematics(RobotKinematics):
