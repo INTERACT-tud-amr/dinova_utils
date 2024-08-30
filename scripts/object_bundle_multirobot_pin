@@ -28,7 +28,7 @@ class Logger():
         self._topic_name = self._name + "/log"
 
         rospy.init_node(self._name)
-        self._rate = rospy.Rate(10)
+        self._rate = rospy.Rate(50) #10 is not sufficient
         self._debug_publisher = rospy.Publisher(
             self._topic_name,
             String,
@@ -63,7 +63,7 @@ class DefaultNode():
     def __init__(self):
         self._name = 'object_bundle'
         rospy.init_node(self._name)
-        self._rate = rospy.Rate(10)
+        self._rate = rospy.Rate(50) #10 is not sufficient
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         # -------------------------------------#
         self.robot_name = rospy.get_namespace()
@@ -108,7 +108,7 @@ class DefaultNode():
     def object_callback(self, data: PoseStamped, object_name: str):
         self._object_poses[object_name] = data
         
-    def publish_objects_multiagent(self, object_poses_full):
+    def publish_objects_multiagent(self, object_poses_full, object_twists):
         object_array = ObjectArray()
         object_array.header.stamp = rospy.Time.now()
         
@@ -123,6 +123,10 @@ class DefaultNode():
             obj.header = object_array.header
             obj.id = i
             obj.pose = pose.pose
+            
+            #object_twists only hold twists information for other robots, assign twists
+            if object_name in object_twists:
+                obj.twist = object_twists[object_name]
             
             if object_name in self.radius_objects:#if sphere
                 obj.shape = SolidPrimitive(type=SolidPrimitive.SPHERE, dimensions=[self.radius_objects[object_name]])
@@ -148,8 +152,8 @@ class DefaultNode():
 
     def run(self):
         while not rospy.is_shutdown():
-            object_poses_full = self.multi_robot_fk.collision_spheres_other_agent(self.object_names, self._object_poses)
-            self.publish_objects_multiagent(object_poses_full)
+            object_poses_full, object_twists = self.multi_robot_fk.collision_spheres_other_agent(self.object_names, self._object_poses)
+            self.publish_objects_multiagent(object_poses_full, object_twists)
             self._rate.sleep()
 
                 
