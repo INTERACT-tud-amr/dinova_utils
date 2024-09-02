@@ -2,11 +2,11 @@ objects_to_remove: [cup1, cup2, wineglass]
 radius_objects: {
   "dingo1": 0.5,
   "dingo2": 0.5,
-  "arm_dingo1" : 0.1,
-  "arm_dingo2" : 0.1,
+  "arm_dingo1": 0.1,
+  "arm_dingo2": 0.1,
   "tablesmall_1": 0.19,
   "tablesmall_2": 0.24,
-  "dynamic_object2": 0.6
-  "obst_1" : 0.6,
-  "obst_2" : 0.6
+  "dynamic_object2": 0.6,
+  "obst_1": 0.6,
+  "obst_2" : 0.6,
 }
