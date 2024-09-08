@@ -14,8 +14,9 @@ class DinovStateSubscriber:
         self.agent_name = "dingo1"
         self._robot_kinematics = MobileManipulatorKinematics()#initialize before the subscriber, othersie no arribute
         
-        self._joint_states_sub = rospy.Subscriber("/"+self.agent_name+'/dinova/omni_states', JointState, self._joint_states_simulation_cb)
-        #self._joint_states_sub = rospy.Subscriber("/"+self.agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        #self._joint_states_sub = rospy.Subscriber("/"+self.agent_name+'/dinova/omni_states', JointState, self._joint_states_simulation_cb)
+        self._joint_states_sub = rospy.Subscriber("/"+self.agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        self._joint_states_sub = rospy.Subscriber("/"+self.agent_name+'/filtered_velocities', JointState, self._joint_velocities_cb)
         self.joint_states = [None]
         self.joint_velocities = [None]
 
@@ -28,6 +29,14 @@ class DinovStateSubscriber:
         #print(msg.position[0:9])
         #print(self.joint_states[0]) otherwise index error
         #self._robot_kinematics#.forward(self.joint_states[0])
+    
+    def _joint_states_cb(self, msg):
+        self.joint_states[0] = np.array(msg.position)[0:9]
+
+    def _joint_velocities_cb(self, msg):
+        self.joint_velocities[0] = np.array(msg.velocity)[0:9]
+        self._get_fk()
+        
     def _get_fk(self,link_name = None):
         self._robot_kinematics.forward(self.joint_states[0], self.joint_velocities[0])
 
@@ -49,11 +58,11 @@ class DinovStateSubscriber:
         
         
         # #Chasis link
-        # v, orientation= self._robot_kinematics.link_velocity("chassis_link")
+        v, orientation= self._robot_kinematics.link_velocity("chassis_link")
         # v_world = self._robot_kinematics.link_velocity("chassis_link", "world")[0]
         # v_world_orientation = self._robot_kinematics.link_velocity("chassis_link", "world")[1]
-        # print("chassis_link local-world translation:",v)
-        # print("chassis_link local-world orientation:",orientation)
+        print("chassis_link local-world translation:",v)
+        print("chassis_link local-world orientation:",orientation)
         
         # print("chassis_link world traslation:",v_world)
         # print("chassis_link world orientation:",v_world_orientation)
