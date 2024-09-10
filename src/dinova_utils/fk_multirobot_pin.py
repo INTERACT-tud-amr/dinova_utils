@@ -81,15 +81,15 @@ class FKMultiRobot():
                         
                         object_name = agent_name+"_"+collision_link
                         object_poses_full[object_name] = PoseStamped()
-                        object_poses_full[object_name].pose.position.x = object_pose[0]
-                        object_poses_full[object_name].pose.position.y = object_pose[1]
-                        object_poses_full[object_name].pose.position.z = object_pose[2]
+                        object_poses_full[object_name].pose.position.x = round(object_pose[0], 2)
+                        object_poses_full[object_name].pose.position.y = round(object_pose[1], 2)
+                        object_poses_full[object_name].pose.position.z = round(object_pose[2], 2)
                         object_poses_full[object_name].header.frame_id = "map"
                         
                         object_twists[object_name] = Twist()
-                        object_twists[object_name].linear.x = object_twist[0]
-                        object_twists[object_name].linear.y = object_twist[1]
-                        object_twists[object_name].linear.z = object_twist[2]
+                        object_twists[object_name].linear.x = round(object_twist[0], 2)
+                        object_twists[object_name].linear.y = round(object_twist[1], 2)
+                        object_twists[object_name].linear.z = round(object_twist[2], 2)
                         
         return object_poses_full, object_twists
     
