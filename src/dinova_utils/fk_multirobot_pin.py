@@ -76,14 +76,20 @@ class FKMultiRobot():
                         #                             position_only=True)
                         # replaced by pinocchio
                         # only get the translation part
-                        object_pose = self.forward_robot_kinematics.link_pose(collision_link)[0]
+                        object_pose_position = self.forward_robot_kinematics.link_pose(collision_link)[0]
+                        object_pose_orientation = self.forward_robot_kinematics.link_pose(collision_link)[1]
                         object_twist= self.forward_robot_kinematics.link_velocity(collision_link)[0]
                         
                         object_name = agent_name+"_"+collision_link
                         object_poses_full[object_name] = PoseStamped()
-                        object_poses_full[object_name].pose.position.x = round(object_pose[0], 2)
-                        object_poses_full[object_name].pose.position.y = round(object_pose[1], 2)
-                        object_poses_full[object_name].pose.position.z = round(object_pose[2], 2)
+                        object_poses_full[object_name].pose.position.x = round(object_pose_position[0], 2)
+                        object_poses_full[object_name].pose.position.y = round(object_pose_position[1], 2)
+                        object_poses_full[object_name].pose.position.z = round(object_pose_position[2], 2)
+                        
+                        object_poses_full[object_name].pose.orientation.x = object_pose_orientation[0]
+                        object_poses_full[object_name].pose.orientation.y = object_pose_orientation[1]
+                        object_poses_full[object_name].pose.orientation.z = object_pose_orientation[2]
+                        object_poses_full[object_name].pose.orientation.w = object_pose_orientation[3]
                         object_poses_full[object_name].header.frame_id = "map"
                         
                         object_twists[object_name] = Twist()

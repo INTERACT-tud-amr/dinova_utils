@@ -2,7 +2,7 @@
 import numpy as np
 import pinocchio
 import rospkg
-
+from spatialmath.base import r2q
 
 class RobotKinematics:
     """Class representing the kinematics model of a robot."""
@@ -54,8 +54,8 @@ class RobotKinematics:
         pose = self.data.oMf[link_idx]
         pos = pose.translation.copy()
         orn = pose.rotation.copy()
-        # if not rotation_matrix:
-        #     orn = r2q(orn, order="xyzs")
+        if not rotation_matrix:
+            orn = r2q(orn, order="xyzs")
         return pos, orn
     
     def link_velocity(self, link_name=None, frame="local_world_aligned"):
