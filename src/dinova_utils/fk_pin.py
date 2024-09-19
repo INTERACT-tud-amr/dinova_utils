@@ -80,7 +80,7 @@ class MobileManipulatorKinematics(RobotKinematics):
     def __init__(self, filepath=None, tool_link_name="tool_frame"):
         if filepath is None:
             rospack = rospkg.RosPack()
-            filepath = rospack.get_path("dinova_mpc_triple_integrator") + "/assets/dinova_no_wheels.urdf"
+            filepath = rospack.get_path("dinova_mobile_manipulation_central") + "/assets/dinova_no_wheels.urdf"
         #urdf_str = XacroDoc.from_file(filepath).to_urdf_string()
 
         # 3-DOF base joint
