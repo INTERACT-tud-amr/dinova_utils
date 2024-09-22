@@ -96,6 +96,9 @@ class FKMultiRobot():
                         object_twists[object_name].linear.x = round(object_twist[0], 2)
                         object_twists[object_name].linear.y = round(object_twist[1], 2)
                         object_twists[object_name].linear.z = round(object_twist[2], 2)
+                        # object_twists[object_name].linear.x = 0
+                        # object_twists[object_name].linear.y = 0
+                        # object_twists[object_name].linear.z = 0
                         
         return object_poses_full, object_twists
     
