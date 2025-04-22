@@ -63,7 +63,7 @@ class DefaultNode():
     def __init__(self):
         self._name = 'object_bundle'
         rospy.init_node(self._name)
-        self._rate = rospy.Rate(10)
+        self._rate = rospy.Rate(40)
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         # -------------------------------------#
         self.robot_name = rospy.get_namespace()

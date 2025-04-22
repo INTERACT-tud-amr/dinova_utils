@@ -78,7 +78,7 @@ class DefaultNode():
         print("object_names that are considered: ", self.object_names)
         self._logger = Logger(self._name, mode=LogMode.LOGINFO)
         rospy.init_node(self._name)
-        self._rate = rospy.Rate(10)
+        self._rate = rospy.Rate(40)
         self._object_poses = {}
         self.establish_ros_connections(self.object_names)
 

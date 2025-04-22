@@ -15,7 +15,6 @@ class FKMultiRobot():
         self.robot_name = robot_name
         self.other_agents = rospy.get_param("all_agents")
         del self.other_agents[self.robot_name]
-        #self.collision_links = self.other_agents[robot_name]['collision_links']
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
         self._q_other_agents = [None] * len(self.other_agents)
@@ -31,11 +30,20 @@ class FKMultiRobot():
         
     def _init_subscribers(self):
         # --- currently only subscribing to 1 other robot ---- #
-        other_agent_name = list(self.other_agents.keys())[0]
-        self._joint_states_sub = rospy.Subscriber("/"+other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        self.other_agent_name = list(self.other_agents.keys())[0]
+        self._joint_states_sub = rospy.Subscriber("/"+self.other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
+        self._fk_links_other = rospy.Subscriber("/"+self.other_agent_name+'/dinova/fk_links', ObjectArray, self._fk_links_cb)
 
     def _joint_states_cb(self, msg: JointState):
         self._q_other_agents[0] = np.array(msg.position)[0:9]
+        
+    def _fk_links_cb(self, msg: ObjectArray):
+        all_fk_links_other = msg.objects
+        self.object_poses_other = {}
+        for fk_link in all_fk_links_other:
+            for collision_link in self.other_agents[self.other_agent_name]['collision_links']:
+                if fk_link.header.frame_id == collision_link:
+                    self.object_poses_other[collision_link] = fk_link.pose
             
     def symbolic_fk(self, URDF_FILE) -> GenericURDFFk:
         with open(URDF_FILE, "r", encoding="utf-8") as file:
@@ -61,15 +69,10 @@ class FKMultiRobot():
                 if agent_name in object_names:
                     object_poses_full.pop(agent_name)
                     for collision_link in agent['collision_links']:
-                        object_pose = self.forward_kinematics.numpy(q=self._q_other_agents[0],
-                                                    parent_link = "base_link",
-                                                    child_link = collision_link,
-                                                    position_only=True)
                         object_name = agent_name+"_"+collision_link
                         object_poses_full[object_name] = PoseStamped()
-                        object_poses_full[object_name].pose.position.x = object_pose[0]
-                        object_poses_full[object_name].pose.position.y = object_pose[1]
-                        object_poses_full[object_name].pose.position.z = object_pose[2]
+                        object_poses_full[object_name].pose = self.object_poses_other[collision_link]
                         object_poses_full[object_name].header.frame_id = "map"
+        print("object_poses_full:", object_poses_full)
         return object_poses_full
     
