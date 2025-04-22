@@ -12,12 +12,12 @@ from derived_object_msgs.msg import Object, ObjectArray
 class FKMultiRobot():
     def __init__(self, robot_name):
         # ---- variables from yaml file ---- #
+        self.object_poses_other = None
         self.robot_name = robot_name
         self.other_agents = rospy.get_param("all_agents")
         del self.other_agents[self.robot_name]
         # ---------------------------------------- #
         rospack = rospkg.RosPack()
-        self._q_other_agents = [None] * len(self.other_agents)
         for other_agent in self.other_agents:
             lidar_argument = self.other_agents[other_agent]['lidar']
             if lidar_argument == True:
@@ -31,11 +31,7 @@ class FKMultiRobot():
     def _init_subscribers(self):
         # --- currently only subscribing to 1 other robot ---- #
         self.other_agent_name = list(self.other_agents.keys())[0]
-        self._joint_states_sub = rospy.Subscriber("/"+self.other_agent_name+'/dinova/omni_states_vicon', JointState, self._joint_states_cb)
         self._fk_links_other = rospy.Subscriber("/"+self.other_agent_name+'/dinova/fk_links', ObjectArray, self._fk_links_cb)
-
-    def _joint_states_cb(self, msg: JointState):
-        self._q_other_agents[0] = np.array(msg.position)[0:9]
         
     def _fk_links_cb(self, msg: ObjectArray):
         all_fk_links_other = msg.objects
@@ -64,7 +60,7 @@ class FKMultiRobot():
                 
     def collision_spheres_other_agent(self, object_names, object_poses):
         object_poses_full = copy.deepcopy(object_poses)
-        if self._q_other_agents[0] is not None:
+        if self.object_poses_other is not None:
             for agent_name, agent in self.other_agents.items():
                 if agent_name in object_names:
                     object_poses_full.pop(agent_name)
@@ -73,6 +69,5 @@ class FKMultiRobot():
                         object_poses_full[object_name] = PoseStamped()
                         object_poses_full[object_name].pose = self.object_poses_other[collision_link]
                         object_poses_full[object_name].header.frame_id = "map"
-        print("object_poses_full:", object_poses_full)
         return object_poses_full
     
